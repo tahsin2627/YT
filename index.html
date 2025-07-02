@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My YouTube WebApp</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 10px;
+    background: #f9f9f9;
+  }
+  h1 {
+    text-align: center;
+  }
+  #searchContainer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  #searchInput {
+    width: 70%;
+    padding: 8px;
+    font-size: 1em;
+  }
+  #searchBtn {
+    padding: 8px 16px;
+    font-size: 1em;
+  }
+  #results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .videoResult {
+    width: 150px;
+    margin: 10px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .videoResult img {
+    width: 100%;
+    display: block;
+  }
+  #player {
+    margin: 20px auto;
+    width: 100%;
+    max-width: 640px;
+    height: 360px;
+  }
+</style>
+</head>
+<body>
+
+<h1>YouTube WebApp</h1>
+
+<div id="searchContainer">
+  <input type="text" id="searchInput" placeholder="Search YouTube..." />
+  <button id="searchBtn">Search</button>
+</div>
+
+<div id="results"></div>
+
+<div id="playerContainer">
+  <div id="player"></div>
+</div>
+
+<!-- Load YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+  let player;
+  let currentVideoId = '';
+
+  // Create the YouTube player after API loads
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '360',
+      width: '640',
+      videoId: '', // start blank
+    });
+  }
+
+  // Search button handler
+document.getElementById('searchBtn').addEventListener('click', () => {
+  const query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+  searchYouTube(query);
+});
+
+// Call the YouTube Data API search endpoint
+function searchYouTube(query) {
+  const apiKey = 'AIzaSyCoVg8Sfckpm7s5WoM1GYAwiTEjSGadqaA'; // <-- Replace with your actual API key
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${apiKey}`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      data.items.forEach(item => {
+        const videoId = item.id.videoId;
+        const title = item.snippet.title;
+        const thumb = item.snippet.thumbnails.medium.url;
+
+        const div = document.createElement('div');
+        div.className = 'videoResult';
+        div.innerHTML = `<img src="${thumb}" alt="${title}"/><br/>${title}`;
+        div.onclick = () => {
+          loadVideo(videoId);
+        };
+        resultsDiv.appendChild(div);
+      });
+    })
+    .catch(err => {
+      alert('Error fetching data');
+      console.error(err);
+    });
+}
+
+// Load selected video into player
+function loadVideo(videoId) {
+  currentVideoId = videoId;
+  if (player && player.loadVideoById) {
+    player.loadVideoById(videoId);
+  }
+}
+</script>
+
+</body>
+</html>
