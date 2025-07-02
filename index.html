@@ -1,63 +1,24 @@
-// --- HTML ELEMENTS ---
-const searchButton = document.getElementById('searchButton');
-const searchInput = document.getElementById('searchInput');
-const resultsContainer = document.getElementById('resultsContainer');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT GodMode</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-// --- EVENT LISTENERS ---
-searchButton.addEventListener('click', () => {
-    const query = searchInput.value;
-    if (query) {
-        searchYouTube(query);
-    }
-});
+    <header>
+        <h1>YT GodMode</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for YouTube videos...">
+            <button id="searchButton">Search</button>
+        </div>
+    </header>
 
-searchInput.addEventListener('keyup', (event) => {
-    if (event.key === 'Enter') {
-        searchButton.click();
-    }
-});
+    <main id="resultsContainer"></main>
 
-// --- FUNCTIONS ---
-async function searchYouTube(query) {
-    resultsContainer.innerHTML = '<p>Loading...</p>';
+    <script src="script.js"></script>
+</body>
+</html>
 
-    // This is the new URL pointing to YOUR serverless function
-    const url = `/.netlify/functions/search?q=${query}`;
-
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Function Error: ${response.statusText}`);
-        }
-        const data = await response.json();
-        // The rest of your code is the same!
-        displayResults(data.items);
-    } catch (error) {
-        console.error('Failed to fetch from function:', error);
-        resultsContainer.innerHTML = `<p>Error fetching videos. Please check the console for details.</p>`;
-    }
-}
-
-function displayResults(videos) {
-    // This function remains exactly the same as before
-    resultsContainer.innerHTML = '';
-    if (!videos || videos.length === 0) {
-        resultsContainer.innerHTML = '<p>No videos found.</p>';
-        return;
-    }
-    videos.forEach(video => {
-        const videoCard = document.createElement('div');
-        videoCard.className = 'video-card';
-        const title = video.snippet.title;
-        const thumbnail = video.snippet.thumbnails.high.url;
-        const channel = video.snippet.channelTitle;
-        videoCard.innerHTML = `
-            <img src="${thumbnail}" alt="${title}">
-            <div class="video-card-content">
-                <h3>${title}</h3>
-                <p>${channel}</p>
-            </div>
-        `;
-        resultsContainer.appendChild(videoCard);
-    });
-}
